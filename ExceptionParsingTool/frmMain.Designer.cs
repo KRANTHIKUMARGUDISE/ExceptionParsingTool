@@ -31,7 +31,10 @@
             this.components = new System.ComponentModel.Container();
             this.pnlForm = new System.Windows.Forms.Panel();
             this.pnlBottom = new System.Windows.Forms.Panel();
+            this.pnlProgress = new System.Windows.Forms.Panel();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.pnlTop = new System.Windows.Forms.Panel();
+            this.lblStatus = new System.Windows.Forms.Label();
             this.btnGenerateReport = new System.Windows.Forms.Button();
             this.dtpTo = new System.Windows.Forms.DateTimePicker();
             this.dtpFrom = new System.Windows.Forms.DateTimePicker();
@@ -39,14 +42,14 @@
             this.txtServerName = new System.Windows.Forms.TextBox();
             this.lblStartDate = new System.Windows.Forms.Label();
             this.lblServer = new System.Windows.Forms.Label();
-            this.pnlProgress = new System.Windows.Forms.Panel();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.lblStatus = new System.Windows.Forms.Label();
+            this.txtLog = new System.Windows.Forms.RichTextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.pnlForm.SuspendLayout();
-            this.pnlTop.SuspendLayout();
+            this.pnlBottom.SuspendLayout();
             this.pnlProgress.SuspendLayout();
+            this.pnlTop.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlForm
@@ -57,16 +60,35 @@
             this.pnlForm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlForm.Location = new System.Drawing.Point(0, 0);
             this.pnlForm.Name = "pnlForm";
-            this.pnlForm.Size = new System.Drawing.Size(577, 334);
+            this.pnlForm.Size = new System.Drawing.Size(602, 435);
             this.pnlForm.TabIndex = 0;
             // 
             // pnlBottom
             // 
+            this.pnlBottom.Controls.Add(this.txtLog);
+            this.pnlBottom.Controls.Add(this.label2);
             this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlBottom.Location = new System.Drawing.Point(0, 209);
             this.pnlBottom.Name = "pnlBottom";
-            this.pnlBottom.Size = new System.Drawing.Size(577, 125);
+            this.pnlBottom.Size = new System.Drawing.Size(602, 226);
             this.pnlBottom.TabIndex = 1;
+            // 
+            // pnlProgress
+            // 
+            this.pnlProgress.Controls.Add(this.progressBar1);
+            this.pnlProgress.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlProgress.Location = new System.Drawing.Point(0, 182);
+            this.pnlProgress.Name = "pnlProgress";
+            this.pnlProgress.Size = new System.Drawing.Size(602, 27);
+            this.pnlProgress.TabIndex = 2;
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.progressBar1.Location = new System.Drawing.Point(0, 0);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(602, 27);
+            this.progressBar1.TabIndex = 0;
             // 
             // pnlTop
             // 
@@ -82,8 +104,19 @@
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
             this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(577, 182);
+            this.pnlTop.Size = new System.Drawing.Size(602, 182);
             this.pnlTop.TabIndex = 0;
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.ForeColor = System.Drawing.Color.Green;
+            this.lblStatus.Location = new System.Drawing.Point(272, 139);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(189, 23);
+            this.lblStatus.TabIndex = 0;
+            this.lblStatus.Text = "Parsing Completed";
+            this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblStatus.Visible = false;
             // 
             // btnGenerateReport
             // 
@@ -148,45 +181,37 @@
             this.lblServer.Text = "Server Name";
             this.lblServer.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // pnlProgress
-            // 
-            this.pnlProgress.Controls.Add(this.progressBar1);
-            this.pnlProgress.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlProgress.Location = new System.Drawing.Point(0, 182);
-            this.pnlProgress.Name = "pnlProgress";
-            this.pnlProgress.Size = new System.Drawing.Size(577, 27);
-            this.pnlProgress.TabIndex = 2;
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.progressBar1.Location = new System.Drawing.Point(0, 0);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(577, 27);
-            this.progressBar1.TabIndex = 0;
-            // 
             // saveFileDialog
             // 
             this.saveFileDialog.InitialDirectory = "C:\\";
             this.saveFileDialog.RestoreDirectory = true;
             // 
-            // lblStatus
+            // txtLog
             // 
-            this.lblStatus.ForeColor = System.Drawing.Color.Green;
-            this.lblStatus.Location = new System.Drawing.Point(272, 139);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(189, 23);
-            this.lblStatus.TabIndex = 0;
-            this.lblStatus.Text = "Parsing Completed";
-            this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.lblStatus.Visible = false;
+            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtLog.Location = new System.Drawing.Point(0, 25);
+            this.txtLog.Name = "txtLog";
+            this.txtLog.ReadOnly = true;
+            this.txtLog.Size = new System.Drawing.Size(602, 201);
+            this.txtLog.TabIndex = 1;
+            this.txtLog.Text = "";
+            // 
+            // label2
+            // 
+            this.label2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label2.Location = new System.Drawing.Point(0, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(602, 25);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Log";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(577, 334);
+            this.ClientSize = new System.Drawing.Size(602, 435);
             this.Controls.Add(this.pnlForm);
             this.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -196,9 +221,10 @@
             this.Text = "Exception Parsing Tool";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.pnlForm.ResumeLayout(false);
+            this.pnlBottom.ResumeLayout(false);
+            this.pnlProgress.ResumeLayout(false);
             this.pnlTop.ResumeLayout(false);
             this.pnlTop.PerformLayout();
-            this.pnlProgress.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -220,6 +246,8 @@
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.RichTextBox txtLog;
+        private System.Windows.Forms.Label label2;
     }
 }
 

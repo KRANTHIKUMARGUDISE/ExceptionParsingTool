@@ -39,6 +39,7 @@ namespace ExceptionParsingTool
                 this.Cursor = Cursors.WaitCursor;
                 progressBar1.Value = 0;
                 lblStatus.Visible = false;
+                txtLog.Clear();
                 #endregion
 
                 //...Perform initial validation to before parsing
@@ -62,6 +63,7 @@ namespace ExceptionParsingTool
                 }
                 #endregion
 
+                txtLog.AppendText("Server Full Path: " + fullPath);
                 //Get Client directories
                 DirectoryInfo mainDir = new DirectoryInfo(fullPath);
                 IEnumerable<DirectoryInfo> clientDirectories = mainDir.GetDirectories()
@@ -115,9 +117,11 @@ namespace ExceptionParsingTool
                 bool flag = false;
                 #endregion
 
+                txtLog.AppendText("\nCount of Client Directories: " + clientDirectories.Count());
                 foreach (DirectoryInfo clientDir in clientDirectories)
                 {
                     progressBar1.Value += 1;
+                    txtLog.AppendText("\nSTART - Client Directory: " + clientDir.FullName);
 
                     ////Check client dir last modified date
                     //if (!CheckDirectoryDate(clientDir)) continue;
@@ -127,11 +131,15 @@ namespace ExceptionParsingTool
                     flag = false;
                     #endregion
                     DirectoryInfo dirs = new DirectoryInfo(clientDir.FullName);
-                    IEnumerable<DirectoryInfo> logDires = dirs.GetDirectories()                    .Where(dr=> dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date).Select(dr=>dr);
+                    IEnumerable<DirectoryInfo> logDires = dirs.GetDirectories()                    .Where(dr => dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date).Select(dr => dr);
 
                     if (logDires.Count() == 0) continue;
+                    txtLog.AppendText("\nCount of Exception Directories: " + logDires.Count());
+
                     foreach (DirectoryInfo logDir in logDires)//Directory.GetDirectories(clientDir))
                     {
+                        txtLog.AppendText("\nSTART - Exception Directory: " + logDir.FullName);
+
                         //Check exception dir last modified date
                         //if (!CheckDirectoryDate(logDir.FullName)) continue;
 
@@ -178,13 +186,17 @@ namespace ExceptionParsingTool
 
                             if (dataEleList != null && dataEleList.Count > 0)
                             {
+                                txtLog.AppendText("\nCount of Data elements: " + dataEleList.Count);
+
                                 foreach (XmlNode dataEle in dataEleList)
                                 {
+                                    formIndex++;
+                                    txtLog.AppendText("\nSTART - Parsing Data Element - " + formIndex);
                                     #region data
                                     clientShortName = dataEle["ClientShortName"].InnerText;
                                     VIN = dataEle["VIN"].InnerText;
                                     AccountNumber = dataEle["AccountNumber"].InnerText;
-                                    formIndex++;
+
                                     FormName = dataEle["Form" + formIndex + "Name"].InnerText;
                                     BusinessProcessDomain = dataEle["BusinessProcessDomain"].InnerText;
                                     #endregion
@@ -215,6 +227,7 @@ namespace ExceptionParsingTool
                                     strDetailed.Append(OutputFileName);
                                     strDetailed.AppendLine("");
                                     #endregion
+                                    txtLog.AppendText("\nEND - Parsing Data Element - " + formIndex);
 
                                 }
                                 flag = true;
@@ -224,15 +237,18 @@ namespace ExceptionParsingTool
 
                         }
                         #endregion
+                        txtLog.AppendText("\nEND - Exception Directory: " + logDir.FullName);
 
                     }
 
                     //write to detailed report file
                     if (flag) File.AppendAllText(detailedFile, strDetailed.ToString());
 
+                    txtLog.AppendText("\nEND - Client Directory: " + clientDir.FullName);
                 }
 
                 #region Summary Report
+                txtLog.AppendText("\nSTART - Summary Report");
                 string summaryFile = outputDir + "\\Summary.csv";
 
                 using (StreamWriter sw = File.CreateText(summaryFile))
@@ -246,6 +262,7 @@ namespace ExceptionParsingTool
                         }))
                         sw.WriteLine("{0},{1}", line.ClientShortName, line.Count);
                 }
+                txtLog.AppendText("\nEnd - Summary Report");
                 #endregion
 
                 lblStatus.Visible = true;
@@ -339,7 +356,7 @@ namespace ExceptionParsingTool
         #region Show Exception
         void ShowError(Exception ex)
         {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(ex.Message + "Log: " + ex.StackTrace, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         #endregion
 
