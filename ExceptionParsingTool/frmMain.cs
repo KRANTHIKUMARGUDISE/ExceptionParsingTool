@@ -48,7 +48,7 @@ namespace ExceptionParsingTool
                 string fullPath = txtServerName.Text.Trim();
 
                 //Check Sever Connectivity
-                if (!CheckDirectory(fullPath)) return;
+                //if (!CheckDirectory(fullPath)) return;
 
                 //Get internal path from config
                 string internalPath = ConfigurationManager.AppSettings.Get("InternalPath");
@@ -63,16 +63,20 @@ namespace ExceptionParsingTool
                 #endregion
 
                 //Get Client directories
-                string[] clientDirectories = Directory.GetDirectories(fullPath);
+                DirectoryInfo mainDir = new DirectoryInfo(fullPath);
+                IEnumerable<DirectoryInfo> clientDirectories = mainDir.GetDirectories()
+                .Where(dr => dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date).Select(dr => dr);
+
+                //string[] clientDirectories = Directory.GetDirectories(fullPath);
 
                 //Check directories existing or not
-                if (clientDirectories == null && clientDirectories.Length <= 0)
+                if (clientDirectories == null && clientDirectories.Count() <= 0)
                 {
                     ShowMessage("No Exception directories exists.");
                     return;
                 }
 
-                progressBar1.Maximum = clientDirectories.Length;
+                progressBar1.Maximum = clientDirectories.Count();
                 progressBar1.Value = 0;
 
                 #region Output Dir
@@ -111,25 +115,28 @@ namespace ExceptionParsingTool
                 bool flag = false;
                 #endregion
 
-                foreach (string clientDir in clientDirectories)
+                foreach (DirectoryInfo clientDir in clientDirectories)
                 {
                     progressBar1.Value += 1;
 
-                    //Check client dir last modified date
-                    if (!CheckDirectoryDate(clientDir)) continue;
+                    ////Check client dir last modified date
+                    //if (!CheckDirectoryDate(clientDir)) continue;
 
                     #region Rest variables
                     strDetailed = new StringBuilder();
                     flag = false;
                     #endregion
+                    DirectoryInfo dirs = new DirectoryInfo(clientDir.FullName);
+                    IEnumerable<DirectoryInfo> logDires = dirs.GetDirectories()                    .Where(dr=> dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date).Select(dr=>dr);
 
-                    foreach (string logDir in Directory.GetDirectories(clientDir))
+                    if (logDires.Count() == 0) continue;
+                    foreach (DirectoryInfo logDir in logDires)//Directory.GetDirectories(clientDir))
                     {
                         //Check exception dir last modified date
-                        if (!CheckDirectoryDate(logDir)) continue;
+                        //if (!CheckDirectoryDate(logDir.FullName)) continue;
 
                         //Get xml files
-                        xmlFiles = Directory.GetFiles(logDir);
+                        xmlFiles = Directory.GetFiles(logDir.FullName);
 
                         #region Parse
                         if (xmlFiles != null && xmlFiles.Length == 2)
