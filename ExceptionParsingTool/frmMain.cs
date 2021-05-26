@@ -113,17 +113,21 @@ namespace ExceptionParsingTool
 
                 foreach (string clientDir in clientDirectories)
                 {
+                    progressBar1.Value += 1;
+
                     //Check client dir last modified date
-                    //Check exception dir last modified date
+                    if (!CheckDirectoryDate(clientDir)) continue;
 
                     #region Rest variables
                     strDetailed = new StringBuilder();
-                    progressBar1.Value += 1;
                     flag = false;
                     #endregion
 
                     foreach (string logDir in Directory.GetDirectories(clientDir))
                     {
+                        //Check exception dir last modified date
+                        if (!CheckDirectoryDate(logDir)) continue;
+
                         //Get xml files
                         xmlFiles = Directory.GetFiles(logDir);
 
@@ -133,10 +137,10 @@ namespace ExceptionParsingTool
 
                             #region Load xmls
                             xmlFile = new XmlDocument();
-                            xmlFile.Load(xmlFiles[0]);
+                            xmlFile.Load(xmlFiles.Where(file => !file.EndsWith(".err.xml")).First());
 
                             xmlErrFile = new XmlDocument();
-                            xmlErrFile.Load(xmlFiles[1]);
+                            xmlErrFile.Load(xmlFiles.Where(file => file.EndsWith(".err.xml")).First());
                             #endregion
 
                             #region err.xml Elements
@@ -185,7 +189,7 @@ namespace ExceptionParsingTool
                                     strDetailed.Append(",");
                                     strDetailed.AppendFormat("=\"{0}\"", AccountNumber);
                                     strDetailed.Append(",");
-                                    strDetailed.Append(clientDir);//DFPROJ = clientDir
+                                    strDetailed.Append(clientDir);//DFPROJ
                                     strDetailed.Append(",");
                                     strDetailed.Append(FormName);
                                     strDetailed.Append(",");
@@ -197,7 +201,6 @@ namespace ExceptionParsingTool
                                     strDetailed.Append(",");
                                     strDetailed.AppendFormat("=\"{0}\"", dateTime);
                                     strDetailed.Append(",");
-                                    //strDetailed.AppendFormat("=\"{0}\"", Exception);
                                     strDetailed.AppendFormat("\"" + Exception + "\"");
                                     strDetailed.Append(",");
                                     strDetailed.Append(OutputFolderPath);
@@ -220,7 +223,6 @@ namespace ExceptionParsingTool
                     //write to detailed report file
                     if (flag) File.AppendAllText(detailedFile, strDetailed.ToString());
 
-                    //System.Threading.Thread.Sleep(1000);
                 }
 
                 #region Summary Report
@@ -255,6 +257,13 @@ namespace ExceptionParsingTool
         }
         #endregion
 
+        #region "Validate Directory based on Date filter"
+        bool CheckDirectoryDate(string dir)
+        {
+            DirectoryInfo dr = new DirectoryInfo(dir);
+            return (dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date);
+        }
+        #endregion
         #region Check Directory Connectivity
         bool CheckDirectory(string path)
         {
