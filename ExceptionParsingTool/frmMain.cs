@@ -66,6 +66,7 @@ namespace ExceptionParsingTool
                 txtLog.AppendText("Server Full Path: " + fullPath);
                 //Get Client directories
                 DirectoryInfo mainDir = new DirectoryInfo(fullPath);
+                txtLog.AppendText("\nGetting Client Directories...");
                 IEnumerable<DirectoryInfo> clientDirectories = mainDir.GetDirectories()
                 .Where(dr => dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date).Select(dr => dr);
 
@@ -111,7 +112,7 @@ namespace ExceptionParsingTool
                 int formIndex = 0;
                 XmlDocument xmlFile, xmlErrFile;
                 XmlNodeList exceptionReportEleList, dataEleList;
-                List<string> summaryData = new List<string>();
+                List<SummaryData> summaryData = new List<SummaryData>();
                 StringBuilder strDetailed = null;
                 string[] xmlFiles = null;
                 bool flag = false;
@@ -131,7 +132,9 @@ namespace ExceptionParsingTool
                     flag = false;
                     #endregion
                     DirectoryInfo dirs = new DirectoryInfo(clientDir.FullName);
-                    IEnumerable<DirectoryInfo> logDires = dirs.GetDirectories()                    .Where(dr => dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date).Select(dr => dr);
+                    txtLog.AppendText("\nGetting Exception Directories...");
+                    IEnumerable<DirectoryInfo> logDires = dirs.GetDirectories()
+                    .Where(dr => dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date).Select(dr => dr);
 
                     if (logDires.Count() == 0) continue;
                     txtLog.AppendText("\nCount of Exception Directories: " + logDires.Count());
@@ -160,10 +163,11 @@ namespace ExceptionParsingTool
 
                             #region err.xml Elements
                             exceptionReportEleList = xmlErrFile.GetElementsByTagName("ExceptionReport");
-                            string dateTime = "", DataFile = "", Exception = "";
+                            string dateTime = "", DataFile = "", Exception = "", totalRecords = "";
                             dateTime = exceptionReportEleList[0]["DateTime"].InnerText;
                             DataFile = exceptionReportEleList[0]["DataFile"].InnerText;
                             Exception = exceptionReportEleList[0]["Exception"].InnerText;
+                            totalRecords = exceptionReportEleList[0]["TotalRecords"].InnerText;
                             #endregion
 
                             #region Reset Variables
@@ -197,7 +201,7 @@ namespace ExceptionParsingTool
                                     VIN = dataEle["VIN"].InnerText;
                                     AccountNumber = dataEle["AccountNumber"].InnerText;
 
-                                    FormName = dataEle["Form" + formIndex + "Name"].InnerText;
+                                    FormName = dataEle["Form1Name"].InnerText;
                                     BusinessProcessDomain = dataEle["BusinessProcessDomain"].InnerText;
                                     #endregion
 
@@ -220,7 +224,7 @@ namespace ExceptionParsingTool
                                     strDetailed.Append(",");
                                     strDetailed.AppendFormat("=\"{0}\"", dateTime);
                                     strDetailed.Append(",");
-                                    strDetailed.AppendFormat("\"" + Exception + "\"");
+                                    strDetailed.AppendFormat("\"" + Exception.Substring(0, Exception.IndexOf('\n')) + "\"");
                                     strDetailed.Append(",");
                                     strDetailed.Append(OutputFolderPath);
                                     strDetailed.Append(",");
@@ -231,7 +235,11 @@ namespace ExceptionParsingTool
 
                                 }
                                 flag = true;
-                                summaryData.Add(clientShortName);
+                                summaryData.Add(new SummaryData()
+                                {
+                                    ClientShortName = clientShortName,
+                                    TotalRecords = Convert.ToInt32(totalRecords),
+                                });
                             }
                             #endregion
 
@@ -248,19 +256,20 @@ namespace ExceptionParsingTool
                 }
 
                 #region Summary Report
-                txtLog.AppendText("\nSTART - Summary Report");
-                string summaryFile = outputDir + "\\Summary.csv";
+                txtLog.AppendText("\nSTART - Summary Level 1 Report");
+                string summaryFile = outputDir + "\\SummaryLevel1.csv";
 
                 using (StreamWriter sw = File.CreateText(summaryFile))
                 {
-                    sw.WriteLine("ClientShortName,Count");
-                    foreach (var line in summaryData.GroupBy(x => x)
+                    sw.WriteLine("ClientShortName,FailedPrintJobs,TotalLetters");
+                    foreach (var line in summaryData.GroupBy(x => x.ClientShortName)
                         .Select(group => new
                         {
                             ClientShortName = group.Key,
-                            Count = group.Count()
+                            Count = group.Count(),
+                            TotalLetters = group.Select(g => g.TotalRecords).Sum()
                         }))
-                        sw.WriteLine("{0},{1}", line.ClientShortName, line.Count);
+                        sw.WriteLine("{0},{1},{2}", line.ClientShortName, line.Count, line.TotalLetters);
                 }
                 txtLog.AppendText("\nEnd - Summary Report");
                 #endregion
