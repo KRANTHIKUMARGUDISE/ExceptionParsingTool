@@ -238,6 +238,7 @@ namespace ExceptionParsingTool
                                 summaryData.Add(new SummaryData()
                                 {
                                     ClientShortName = clientShortName,
+                                    Date = Convert.ToDateTime(dateTime).Date.ToShortDateString(),
                                     TotalRecords = Convert.ToInt32(totalRecords),
                                 });
                             }
@@ -249,13 +250,14 @@ namespace ExceptionParsingTool
 
                     }
 
+                    txtLog.AppendText("\nWriting parsed data to Detailed Report...");
                     //write to detailed report file
                     if (flag) File.AppendAllText(detailedFile, strDetailed.ToString());
 
                     txtLog.AppendText("\nEND - Client Directory: " + clientDir.FullName);
                 }
 
-                #region Summary Report
+                #region Summary Report Level 1
                 txtLog.AppendText("\nSTART - Summary Level 1 Report");
                 string summaryFile = outputDir + "\\SummaryLevel1.csv";
 
@@ -271,7 +273,26 @@ namespace ExceptionParsingTool
                         }))
                         sw.WriteLine("{0},{1},{2}", line.ClientShortName, line.Count, line.TotalLetters);
                 }
-                txtLog.AppendText("\nEnd - Summary Report");
+                txtLog.AppendText("\nEnd - Summary Level 1 Report");
+                #endregion
+
+                #region Summary Report Level 2
+                txtLog.AppendText("\nSTART - Summary Level 2 Report");
+                string summaryFile2 = outputDir + "\\SummaryLevel2.csv";
+
+                using (StreamWriter sw = File.CreateText(summaryFile2))
+                {
+                    sw.WriteLine("ClientShortName,Date,FailedPrintJobs,TotalLetters");
+                    foreach (var line in summaryData.GroupBy(x => new { x.ClientShortName, x.Date })
+                        .Select(group => new
+                        {
+                            GroupKey = group.Key,
+                            Count = group.Count(),
+                            TotalLetters = group.Select(g => g.TotalRecords).Sum()
+                        }))
+                        sw.WriteLine("{0},=\"{1}\",{2},{3}", line.GroupKey.ClientShortName, line.GroupKey.Date, line.Count, line.TotalLetters);
+                }
+                txtLog.AppendText("\nEnd - Summary Level 2 Report");
                 #endregion
 
                 lblStatus.Visible = true;

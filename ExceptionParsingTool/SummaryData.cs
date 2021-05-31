@@ -9,6 +9,7 @@ namespace ExceptionParsingTool
     public class SummaryData
     {
         internal string ClientShortName { get; set; }
+        internal string Date { get; set; }
         internal int TotalRecords { get; set; }
     }
 }
