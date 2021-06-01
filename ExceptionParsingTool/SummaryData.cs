@@ -11,5 +11,7 @@ namespace ExceptionParsingTool
         internal string ClientShortName { get; set; }
         internal string Date { get; set; }
         internal int TotalRecords { get; set; }
+        internal string FormName { get; set; }
+        internal string DFPROJ { get; set; }
     }
 }

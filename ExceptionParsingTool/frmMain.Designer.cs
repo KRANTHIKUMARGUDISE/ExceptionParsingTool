@@ -31,9 +31,12 @@
             this.components = new System.ComponentModel.Container();
             this.pnlForm = new System.Windows.Forms.Panel();
             this.pnlBottom = new System.Windows.Forms.Panel();
+            this.txtLog = new System.Windows.Forms.RichTextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.pnlProgress = new System.Windows.Forms.Panel();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.pnlTop = new System.Windows.Forms.Panel();
+            this.lblStatusLink = new System.Windows.Forms.LinkLabel();
             this.lblStatus = new System.Windows.Forms.Label();
             this.btnGenerateReport = new System.Windows.Forms.Button();
             this.dtpTo = new System.Windows.Forms.DateTimePicker();
@@ -44,8 +47,6 @@
             this.lblServer = new System.Windows.Forms.Label();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.txtLog = new System.Windows.Forms.RichTextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.pnlForm.SuspendLayout();
             this.pnlBottom.SuspendLayout();
             this.pnlProgress.SuspendLayout();
@@ -73,6 +74,26 @@
             this.pnlBottom.Size = new System.Drawing.Size(602, 226);
             this.pnlBottom.TabIndex = 1;
             // 
+            // txtLog
+            // 
+            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtLog.Location = new System.Drawing.Point(0, 25);
+            this.txtLog.Name = "txtLog";
+            this.txtLog.ReadOnly = true;
+            this.txtLog.Size = new System.Drawing.Size(602, 201);
+            this.txtLog.TabIndex = 1;
+            this.txtLog.Text = "";
+            // 
+            // label2
+            // 
+            this.label2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label2.Location = new System.Drawing.Point(0, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(602, 25);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Log";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // pnlProgress
             // 
             this.pnlProgress.Controls.Add(this.progressBar1);
@@ -93,6 +114,7 @@
             // pnlTop
             // 
             this.pnlTop.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.pnlTop.Controls.Add(this.lblStatusLink);
             this.pnlTop.Controls.Add(this.lblStatus);
             this.pnlTop.Controls.Add(this.btnGenerateReport);
             this.pnlTop.Controls.Add(this.dtpTo);
@@ -106,6 +128,20 @@
             this.pnlTop.Name = "pnlTop";
             this.pnlTop.Size = new System.Drawing.Size(602, 182);
             this.pnlTop.TabIndex = 0;
+            // 
+            // lblStatusLink
+            // 
+            this.lblStatusLink.LinkColor = System.Drawing.Color.Green;
+            this.lblStatusLink.Location = new System.Drawing.Point(272, 142);
+            this.lblStatusLink.Name = "lblStatusLink";
+            this.lblStatusLink.Size = new System.Drawing.Size(139, 16);
+            this.lblStatusLink.TabIndex = 4;
+            this.lblStatusLink.TabStop = true;
+            this.lblStatusLink.Text = "Parsing Completed";
+            this.lblStatusLink.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolTip.SetToolTip(this.lblStatusLink, "Click to open the Ouput directory");
+            this.lblStatusLink.Visible = false;
+            this.lblStatusLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblStatusLink_LinkClicked);
             // 
             // lblStatus
             // 
@@ -134,7 +170,7 @@
             this.dtpTo.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpTo.Location = new System.Drawing.Point(128, 99);
             this.dtpTo.Name = "dtpTo";
-            this.dtpTo.Size = new System.Drawing.Size(138, 26);
+            this.dtpTo.Size = new System.Drawing.Size(138, 22);
             this.dtpTo.TabIndex = 2;
             // 
             // dtpFrom
@@ -143,7 +179,7 @@
             this.dtpFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpFrom.Location = new System.Drawing.Point(128, 62);
             this.dtpFrom.Name = "dtpFrom";
-            this.dtpFrom.Size = new System.Drawing.Size(138, 26);
+            this.dtpFrom.Size = new System.Drawing.Size(138, 22);
             this.dtpFrom.TabIndex = 1;
             // 
             // label1
@@ -159,7 +195,7 @@
             // 
             this.txtServerName.Location = new System.Drawing.Point(128, 27);
             this.txtServerName.Name = "txtServerName";
-            this.txtServerName.Size = new System.Drawing.Size(406, 26);
+            this.txtServerName.Size = new System.Drawing.Size(406, 22);
             this.txtServerName.TabIndex = 0;
             this.toolTip.SetToolTip(this.txtServerName, "Enter Server Name. Do not include \'/\'");
             // 
@@ -186,29 +222,9 @@
             this.saveFileDialog.InitialDirectory = "C:\\";
             this.saveFileDialog.RestoreDirectory = true;
             // 
-            // txtLog
-            // 
-            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtLog.Location = new System.Drawing.Point(0, 25);
-            this.txtLog.Name = "txtLog";
-            this.txtLog.ReadOnly = true;
-            this.txtLog.Size = new System.Drawing.Size(602, 201);
-            this.txtLog.TabIndex = 1;
-            this.txtLog.Text = "";
-            // 
-            // label2
-            // 
-            this.label2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label2.Location = new System.Drawing.Point(0, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(602, 25);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Log";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // frmMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(602, 435);
@@ -248,6 +264,7 @@
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.RichTextBox txtLog;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.LinkLabel lblStatusLink;
     }
 }
 

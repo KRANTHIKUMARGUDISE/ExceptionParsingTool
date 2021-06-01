@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -15,10 +16,12 @@ namespace ExceptionParsingTool
 {
     public partial class frmMain : Form
     {
+        #region Constructor
         public frmMain()
         {
             InitializeComponent();
         }
+        #endregion
 
         #region Generate Report
         //Algo.
@@ -38,7 +41,9 @@ namespace ExceptionParsingTool
                 btnGenerateReport.Enabled = false;
                 this.Cursor = Cursors.WaitCursor;
                 progressBar1.Value = 0;
-                lblStatus.Visible = false;
+                //lblStatus.Visible = false;
+                lblStatusLink.Visible = false;
+                lblStatusLink.Tag = null;
                 txtLog.Clear();
                 #endregion
 
@@ -94,7 +99,7 @@ namespace ExceptionParsingTool
                     ShowMessage("Destination Folder not available.");
                     return;
                 }
-                outputDir += "\\" + DateTime.Now.ToString("MM-dd-yyyy hh-mm-ss");
+                outputDir += "\\" + DateTime.Now.ToString("MM-dd-yyyy HH-mm-ss");
                 Directory.CreateDirectory(outputDir);
                 #endregion
 
@@ -108,11 +113,11 @@ namespace ExceptionParsingTool
                 #endregion
 
                 #region Variables Declaration
-                string clientShortName = "", VIN = "", AccountNumber = "", FormName = "", BusinessProcessDomain = "", OutputFolderPath = "", OutputFileName = "";
+                string clientShortName = "", VIN = "", accountNumber = "", formName = "", businessProcessDomain = "", outputFolderPath = "", outputFileName = "";
                 int formIndex = 0;
                 XmlDocument xmlFile, xmlErrFile;
                 XmlNodeList exceptionReportEleList, dataEleList;
-                List<SummaryData> summaryData = new List<SummaryData>();
+                List<SummaryData> summaryData = new List<SummaryData>(), summary3Data = new List<SummaryData>();
                 StringBuilder strDetailed = null;
                 string[] xmlFiles = null;
                 bool flag = false;
@@ -171,7 +176,7 @@ namespace ExceptionParsingTool
                             #endregion
 
                             #region Reset Variables
-                            clientShortName = VIN = AccountNumber = FormName = BusinessProcessDomain = OutputFolderPath = OutputFileName = "";
+                            clientShortName = VIN = accountNumber = formName = businessProcessDomain = outputFolderPath = outputFileName = "";
                             formIndex = 0;
                             #endregion
 
@@ -179,8 +184,8 @@ namespace ExceptionParsingTool
                             dataEleList = xmlFile.GetElementsByTagName("Args");
                             if (dataEleList != null && dataEleList.Count > 0)
                             {
-                                OutputFolderPath = dataEleList[0]["OutputFolderPath"].InnerText;
-                                OutputFileName = dataEleList[0]["OutputFileName"].InnerText;
+                                outputFolderPath = dataEleList[0]["OutputFolderPath"].InnerText;
+                                outputFileName = dataEleList[0]["OutputFileName"].InnerText;
                             }
                             #endregion
 
@@ -199,10 +204,10 @@ namespace ExceptionParsingTool
                                     #region data
                                     clientShortName = dataEle["ClientShortName"].InnerText;
                                     VIN = dataEle["VIN"].InnerText;
-                                    AccountNumber = dataEle["AccountNumber"].InnerText;
+                                    accountNumber = dataEle["AccountNumber"].InnerText;
 
-                                    FormName = dataEle["Form1Name"].InnerText;
-                                    BusinessProcessDomain = dataEle["BusinessProcessDomain"].InnerText;
+                                    formName = dataEle["Form1Name"].InnerText;
+                                    businessProcessDomain = dataEle["BusinessProcessDomain"].InnerText;
                                     #endregion
 
                                     #region Build detailed report row
@@ -210,13 +215,13 @@ namespace ExceptionParsingTool
                                     strDetailed.Append(",");
                                     strDetailed.Append(VIN);
                                     strDetailed.Append(",");
-                                    strDetailed.AppendFormat("=\"{0}\"", AccountNumber);
+                                    strDetailed.AppendFormat("=\"{0}\"", accountNumber);
                                     strDetailed.Append(",");
                                     strDetailed.Append(clientDir);//DFPROJ
                                     strDetailed.Append(",");
-                                    strDetailed.Append(FormName);
+                                    strDetailed.Append(formName);
                                     strDetailed.Append(",");
-                                    strDetailed.Append(BusinessProcessDomain);
+                                    strDetailed.Append(businessProcessDomain);
                                     strDetailed.Append(",");
                                     strDetailed.Append(txtServerName.Text);
                                     strDetailed.Append(",");
@@ -226,21 +231,31 @@ namespace ExceptionParsingTool
                                     strDetailed.Append(",");
                                     strDetailed.AppendFormat("\"" + Exception.Substring(0, Exception.IndexOf('\n')) + "\"");
                                     strDetailed.Append(",");
-                                    strDetailed.Append(OutputFolderPath);
+                                    strDetailed.Append(outputFolderPath);
                                     strDetailed.Append(",");
-                                    strDetailed.Append(OutputFileName);
+                                    strDetailed.Append(outputFileName);
                                     strDetailed.AppendLine("");
                                     #endregion
                                     txtLog.AppendText("\nEND - Parsing Data Element - " + formIndex);
 
+                                    txtLog.AppendText("\nPreparing data to generate Summary Level 3 Report");
+                                    summary3Data.Add(new SummaryData()
+                                    {
+                                        FormName = formName,
+                                        ClientShortName = clientShortName,
+                                        DFPROJ = clientDir.Name,
+                                        Date = Convert.ToDateTime(dateTime).Date.ToShortDateString(),
+                                    });
                                 }
                                 flag = true;
+                                txtLog.AppendText("\nPreparing data to generate Summary Level 1 Report");
                                 summaryData.Add(new SummaryData()
                                 {
                                     ClientShortName = clientShortName,
                                     Date = Convert.ToDateTime(dateTime).Date.ToShortDateString(),
                                     TotalRecords = Convert.ToInt32(totalRecords),
                                 });
+                                txtLog.AppendText("\nSTART - Summary Level 1 Report");
                             }
                             #endregion
 
@@ -295,8 +310,30 @@ namespace ExceptionParsingTool
                 txtLog.AppendText("\nEnd - Summary Level 2 Report");
                 #endregion
 
-                lblStatus.Visible = true;
+                #region Summary Report Level 3
+                txtLog.AppendText("\nSTART - Summary Level 3 Report");
+                string summaryFile3 = outputDir + "\\SummaryLevel3.csv";
 
+                using (StreamWriter sw = File.CreateText(summaryFile3))
+                {
+                    sw.WriteLine("ClientShortName,DFPROJ,FormName,Date,FailedPrintJobs");
+                    foreach (var line in summary3Data.GroupBy(x => new { x.ClientShortName, x.DFPROJ, x.FormName, x.Date })
+                        .Select(group => new
+                        {
+                            GroupKey = group.Key,
+                            Count = group.Count()
+                            //DFPROJ = group.Select(g => g.DFPROJ).FirstOrDefault(),
+                        }))
+                        sw.WriteLine("{0},{1},{2},=\"{3}\",{4}", line.GroupKey.ClientShortName, line.GroupKey.DFPROJ, line.GroupKey.FormName, line.GroupKey.Date, line.Count);
+                }
+                txtLog.AppendText("\nEnd - Summary Level 3 Report");
+                #endregion
+
+                //lblStatus.Visible = true;
+                lblStatusLink.Visible = true;
+                lblStatusLink.Tag = outputDir;//maintaining output directory for future usage
+                txtLog.AppendText("\nOpening output directory: " + outputDir);
+                OpenOutDir();
             }
             catch (Exception ex)
             {
@@ -309,15 +346,17 @@ namespace ExceptionParsingTool
                 btnGenerateReport.Enabled = true;
             }
         }
+
         #endregion
 
-        #region "Validate Directory based on Date filter"
+        #region Validate Directory based on Date filter
         bool CheckDirectoryDate(string dir)
         {
             DirectoryInfo dr = new DirectoryInfo(dir);
             return (dtpFrom.Value.Date <= dr.LastWriteTime.Date && dr.LastWriteTime.Date <= dtpTo.Value.Date);
         }
         #endregion
+
         #region Check Directory Connectivity
         bool CheckDirectory(string path)
         {
@@ -416,5 +455,26 @@ namespace ExceptionParsingTool
 
         }
         #endregion
+
+        #region Open Output directory
+        void OpenOutDir()
+        {
+            try
+            {
+                if (lblStatusLink.Tag != null && !string.IsNullOrEmpty(lblStatusLink.Tag.ToString()))
+                    //Process.Start("explorer.exe", "/select," + lblStatusLink.Tag);
+                    Process.Start("explorer.exe", lblStatusLink.Tag.ToString());
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex);
+            }
+        }
+        private void lblStatusLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            OpenOutDir();
+        }
+        #endregion
+
     }
 }
